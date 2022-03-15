@@ -1,0 +1,11 @@
+/*
+.DS_Store
+!/addons
+!README.md
+!LICENSE
+!CONTRIBUTORS.md
+!.gitignore
+!.gitattributes
+# Godot generated files
+/.import/*
+*.import
