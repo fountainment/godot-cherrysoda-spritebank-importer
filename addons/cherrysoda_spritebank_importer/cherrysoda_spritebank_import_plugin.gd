@@ -45,10 +45,7 @@ func get_preset_name(preset):
 func get_import_options(preset):
 	match preset:
 		Presets.DEFAULT:
-			return [{
-					   "name": "use_red_anyway",
-					   "default_value": false
-					}]
+			return []
 		_:
 			return []
 
@@ -83,16 +80,17 @@ func get_frames(path):
 func get_animation(animatedSprite, id, fps, frame_count, loop):
 	var animation = Animation.new()
 	var start_track_id = animation.add_track(Animation.TYPE_VALUE)
-	animation.track_set_interpolation_type(start_track_id, Animation.INTERPOLATION_NEAREST)
+	animation.value_track_set_update_mode(start_track_id, Animation.UPDATE_DISCRETE)
 	animation.track_set_path(start_track_id, "AnimatedSprite:animation")
 	animation.track_insert_key(start_track_id, 0, id)
 	var track_id = animation.add_track(Animation.TYPE_VALUE)
-	animation.track_set_interpolation_type(track_id, Animation.INTERPOLATION_NEAREST)
+	animation.value_track_set_update_mode(track_id, Animation.UPDATE_DISCRETE)
 	animation.track_set_path(track_id, "AnimatedSprite:frame")
 	for i in frame_count:
 		animation.track_insert_key(track_id, i / fps, i)
 	animation.set_length(frame_count / fps)
 	animation.set_loop(loop)
+	animation.set_step(1 / fps)
 	return animation
 
 
@@ -130,6 +128,9 @@ func import(source_file, save_path, options, r_platform_variants, r_gen_files):
 		var default_fps = round(1.0 / float(sprite.delay))
 		var start_animation = str(sprite.start)
 		var sprite_path = str(sprite.path)
+		
+		if !sprite.has("Center") and !sprite.has("Justify"):
+			animatedSprite.centered = false
 
 		if sprite.has("Anim"):
 			for anim in sprite.Anim:
@@ -152,7 +153,6 @@ func import(source_file, save_path, options, r_platform_variants, r_gen_files):
 				animationPlayer.add_animation(anim.id, animation)
 				if anim.id == start_animation:
 					animatedSprite.animation = anim.id
-					animationPlayer.current_animation = anim.id
 		
 		if sprite.has("Loop"):
 			for anim in sprite.Loop:
@@ -175,7 +175,6 @@ func import(source_file, save_path, options, r_platform_variants, r_gen_files):
 				animationPlayer.add_animation(anim.id, animation)
 				if anim.id == start_animation:
 					animatedSprite.animation = anim.id
-					animationPlayer.current_animation = anim.id
 
 
 	var packed_scene = PackedScene.new()
